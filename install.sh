@@ -21,6 +21,7 @@ else
 fi
 
 echo "Stowing dotfiles..."
+stow -D -v -d "$DOTFILES_DIR" -t "$HOME" hypr google-chrome omarchy
 stow -v -d "$DOTFILES_DIR" -t "$HOME" hypr google-chrome omarchy
 
 echo "Installing local binaries..."

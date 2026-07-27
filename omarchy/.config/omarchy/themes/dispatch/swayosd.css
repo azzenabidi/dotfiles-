@@ -1,0 +1,5 @@
+/* Dispatch Theme - SwayOSD */
+@define-color bg_color alpha(#0a0e17, 0.92);
+@define-color bar_bg_color alpha(#12161f, 0.8);
+@define-color bar_fill_color #1e90ff;
+@define-color text_color #e0e4ec;

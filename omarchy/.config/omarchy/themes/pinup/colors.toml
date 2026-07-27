@@ -1,0 +1,88 @@
+#    .-============================-.
+#  .'   *     .     *     .     *    '.
+# /     ____ ___ _   _ _   _ ____      \
+# |    |  _ \_ _| \ | | | | |  _ \     |
+# |    | |_) | ||  \| | | | | |_) |    |
+# |    |  __/| || |\  | |_| |  __/     |
+# |    |_|  |___|_| \_|\___/|_|        |
+# \                                    /
+#  '.    *     .     *     .    *    .'
+#    '-============================-'
+
+mode = "light"
+
+# Accent and UI colors
+accent = "#004584"
+active_border_color = "#2865b6"
+active_tab_background = "#004584"
+
+# Cursor colors
+cursor = "#190403"
+
+# Primary colors
+foreground = "#190403"
+background = "#eee1c3"
+
+# Selection colors
+selection_foreground = "#eee1c3"
+selection_background = "#004584"
+
+# Normal colors (ANSI 0-7)
+color0 = "#eee1c3"
+color1 = "#6b2e06"
+color2 = "#465900"
+color3 = "#61620d"
+color4 = "#004584"
+color5 = "#6d2e52"
+color6 = "#00656a"
+color7 = "#190403"
+
+# Bright colors (ANSI 8-15)
+color8 = "#b59b72"
+color9 = "#944e1e"
+color10 = "#657e00"
+color11 = "#838707"
+color12 = "#2865b6"
+color13 = "#964b79"
+color14 = "#2b8a90"
+color15 = "#391d19"
+
+#  ______   __       ______
+# /_____/\ /_/\     /_____/\
+# \:::_ \ \\:\ \    \:::_ \ \
+#  \:\ \ \ \\:\ \    \:\ \ \ \
+#   \:\ \ \ \\:\ \____\:\ \ \ \
+#    \:\_\ \ \\:\/___/\\:\/.:| |
+#  ___\_____\/_\_____\/ \____/_/  ______    _______   ______
+# /________/\/_____/\ /_______/\ /_____/\ /_______/\ /_____/\
+# \__.::.__\/\:::_ \ \\::: _  \ \\:::_ \ \\::: _  \ \\:::_ \ \
+#   /_\::\ \  \:\ \ \ \\::(_)  \/_\:\ \ \ \\::(_)  \/_\:\ \ \ \
+#   \:.\::\ \  \:\ \ \ \\::  _  \ \\:\ \ \ \\::  _  \ \\:\ \ \ \
+#    \: \  \ \  \:\_\ \ \\::(_)  \ \\:\_\ \ \\::(_)  \ \\:\_\ \ \
+#     \_____\/   \_____\/ \_______\/ \_____\/ \_______\/ \_____\/
+
+# Omarchy 4 semantic palette roles. Keep these aligned with color0-color15.
+bg = "#eee1c3"
+lighter_bg = "#eee1c3"
+selection = "#004584"
+muted = "#b59b72"
+dark_fg = "#b59b72"
+fg = "#190403"
+light_fg = "#190403"
+bright_fg = "#391d19"
+red = "#6b2e06"
+green = "#465900"
+yellow = "#61620d"
+blue = "#004584"
+magenta = "#6d2e52"
+cyan = "#00656a"
+orange = "#61620d"
+brown = "#313107"
+dark_bg = "#b3a992"
+darker_bg = "#777162"
+bright_red = "#944e1e"
+bright_green = "#657e00"
+bright_yellow = "#838707"
+bright_blue = "#2865b6"
+bright_magenta = "#964b79"
+bright_cyan = "#2b8a90"

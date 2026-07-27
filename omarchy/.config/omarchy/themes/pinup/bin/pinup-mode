@@ -1,0 +1,467 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_path=$(readlink -f "${BASH_SOURCE[0]}")
+source_theme_dir=$(cd "$(dirname "$script_path")/.." && pwd)
+active_theme_dir="${HOME}/.config/omarchy/current/theme"
+theme_name_file="${HOME}/.config/omarchy/current/theme.name"
+theme_dir="${PINUP_THEME_DIR:-$active_theme_dir}"
+user_theme_dir="${PINUP_USER_THEME_DIR:-${HOME}/.config/omarchy/themes/pinup}"
+official_theme_dir="${OMARCHY_PATH:-${HOME}/.local/share/omarchy}/themes/pinup"
+state_dir="${PINUP_STATE_DIR:-${HOME}/.config/omarchy/pinup-mode}"
+default_mode_file="${PINUP_DEFAULT_MODE_FILE:-$state_dir/default-mode}"
+default_hook_path="${PINUP_DEFAULT_HOOK_PATH:-${HOME}/.config/omarchy/hooks/theme-set.d/00-00-pinup-mode-default}"
+path_profile="${PINUP_PATH_PROFILE:-}"
+dry_run=0
+
+usage() {
+  cat <<'USAGE'
+Usage: pinup-mode [--dry-run] <light|dark|toggle|status|install>
+       pinup-mode [--dry-run] default <light|dark|status>
+
+Switch the active Omarchy Pinup theme between its bundled light and dark
+overlays. Set PINUP_THEME_DIR to target a different theme directory.
+
+Use `pinup-mode default dark` to make Omarchy's theme switcher load Pinup in
+dark mode by default. This writes a user preference outside the theme repo and
+installs an early theme-set hook that applies the preferred overlay before
+other theme-set.d hooks continue.
+
+Run `pinup-mode install` once to add `pinup-mode` and `pinup-toggle` commands
+to ~/.local/bin.
+USAGE
+}
+
+log() {
+  printf '%s\n' "$*"
+}
+
+run() {
+  if (( dry_run )); then
+    printf '+ %q' "$1"
+    shift || true
+    for arg in "$@"; do
+      printf ' %q' "$arg"
+    done
+    printf '\n'
+  else
+    "$@"
+  fi
+}
+
+has_mode_overlays() {
+  local dir="$1"
+  [[ -d "$dir/modes/light" && -d "$dir/modes/dark" ]]
+}
+
+mode_source_dir() {
+  for dir in "$user_theme_dir" "$official_theme_dir" "$source_theme_dir" "$theme_dir"; do
+    if has_mode_overlays "$dir"; then
+      printf '%s\n' "$dir"
+      return
+    fi
+  done
+
+  printf '%s\n' "$source_theme_dir"
+}
+
+current_mode() {
+  if [[ -f "$theme_dir/mode.state" ]]; then
+    case "$(tr -d '[:space:]' <"$theme_dir/mode.state")" in
+      light | dark) tr -d '[:space:]' <"$theme_dir/mode.state"; return ;;
+    esac
+  fi
+
+  if [[ -f "$theme_dir/colors.toml" ]]; then
+    awk -F'"' '/^[[:space:]]*mode[[:space:]]*=/{ print $2; exit }' "$theme_dir/colors.toml"
+    return
+  fi
+
+  if [[ -f "$theme_dir/light.mode" ]]; then
+    printf 'light\n'
+  else
+    printf 'dark\n'
+  fi
+}
+
+ensure_pinup_target() {
+  local overlay_source
+
+  [[ -d "$theme_dir" ]] || {
+    log "Target theme directory does not exist: $theme_dir"
+    exit 1
+  }
+
+  overlay_source=$(mode_source_dir)
+  has_mode_overlays "$overlay_source" || {
+    log "Mode overlays are missing from: $overlay_source/modes"
+    exit 1
+  }
+
+  if [[ "$theme_dir" == "$active_theme_dir" && -f "$theme_name_file" ]]; then
+    active_name=$(tr -d '[:space:]' <"$theme_name_file")
+    [[ "$active_name" == "pinup" ]] || {
+      log "Active Omarchy theme is '$active_name', not 'pinup'."
+      log "Set PINUP_THEME_DIR to override the target directory."
+      exit 1
+    }
+  fi
+}
+
+ensure_mode_overlays() {
+  local overlay_source
+
+  overlay_source=$(mode_source_dir)
+  has_mode_overlays "$overlay_source" || {
+    log "Mode overlays are missing from: $overlay_source/modes"
+    exit 1
+  }
+}
+
+shell_apply_theme() {
+  command -v omarchy-shell >/dev/null 2>&1 || return 0
+
+  if (( dry_run )); then
+    log '+ omarchy-shell shell applyTheme <colors.toml> <shell.toml>'
+    return 0
+  fi
+
+  colors_payload=""
+  shell_payload=""
+  [[ -f "$theme_dir/colors.toml" ]] && colors_payload=$(base64 -w 0 "$theme_dir/colors.toml")
+  [[ -f "$theme_dir/shell.toml" ]] && shell_payload=$(base64 -w 0 "$theme_dir/shell.toml")
+
+  timeout 2 omarchy-shell shell applyTheme "$colors_payload" "$shell_payload" >/dev/null 2>&1 || true
+}
+
+run_best_effort() {
+  local cmd="$1"
+  shift || true
+
+  command -v "$cmd" >/dev/null 2>&1 || return 0
+  if (( dry_run )); then
+    run "$cmd" "$@"
+  else
+    "$cmd" "$@" >/dev/null 2>&1 || true
+  fi
+}
+
+run_theme_set_hooks() {
+  command -v omarchy-hook >/dev/null 2>&1 || return 0
+  if (( dry_run )); then
+    log '+ PINUP_MODE_HOOK_ACTIVE=1 omarchy-hook theme-set pinup'
+  else
+    PINUP_MODE_HOOK_ACTIVE=1 omarchy-hook theme-set pinup >/dev/null 2>&1 || true
+  fi
+}
+
+apply_followup_hooks() {
+  shell_apply_theme
+
+  run_best_effort hyprctl reload
+  run_best_effort omarchy-restart-terminal
+  run_best_effort omarchy-restart-hyprctl
+  run_best_effort omarchy-restart-btop
+  run_best_effort omarchy-restart-helix
+  run_best_effort omarchy-theme-set-foot
+  run_best_effort omarchy-theme-set-tmux
+  run_best_effort omarchy-theme-set-gnome
+  run_best_effort omarchy-theme-set-pi --activate
+  run_best_effort omarchy-theme-set-browser
+  run_best_effort omarchy-theme-set-vscode
+  run_best_effort omarchy-theme-set-obsidian
+  run_best_effort omarchy-theme-set-keyboard
+  if [[ "${PINUP_MODE_SKIP_THEME_HOOKS:-0}" != "1" ]]; then
+    run_theme_set_hooks
+  fi
+}
+
+apply_mode() {
+  local mode="$1"
+  local overlay_source
+  local overlay
+
+  ensure_pinup_target
+  [[ "$mode" == "light" || "$mode" == "dark" ]] || {
+    log "Invalid mode: $mode"
+    usage
+    exit 1
+  }
+
+  overlay_source=$(mode_source_dir)
+  overlay="$overlay_source/modes/$mode"
+
+  log "Applying Pinup $mode mode to $theme_dir"
+  log "Using mode files from $overlay_source"
+  run cp -a "$overlay/." "$theme_dir/"
+  if [[ "$mode" == "light" ]]; then
+    run touch "$theme_dir/light.mode"
+  else
+    run rm -f "$theme_dir/light.mode"
+  fi
+  if (( dry_run )); then
+    log "+ write $theme_dir/mode.state = $mode"
+  else
+    printf '%s\n' "$mode" >"$theme_dir/mode.state"
+  fi
+
+  apply_followup_hooks
+  log "Pinup mode: $mode"
+}
+
+default_mode() {
+  local mode
+  local overlay_source
+
+  overlay_source=$(mode_source_dir)
+
+  for mode_file in "$default_mode_file" "$user_theme_dir/mode.default" "$overlay_source/mode.default" "$source_theme_dir/mode.default"; do
+    if [[ -f "$mode_file" ]]; then
+      mode=$(tr -d '[:space:]' <"$mode_file")
+      case "$mode" in
+        light | dark) printf '%s\n' "$mode"; return ;;
+      esac
+    fi
+  done
+
+  printf 'light\n'
+}
+
+install_default_hook() {
+  log "Installing Pinup default mode hook to $default_hook_path"
+  run mkdir -p "$(dirname "$default_hook_path")"
+
+  if (( dry_run )); then
+    log "+ write $default_hook_path"
+    log "+ chmod +x $default_hook_path"
+    return
+  fi
+
+  cat >"$default_hook_path" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+theme_name="${1:-}"
+[[ "$theme_name" == "pinup" ]] || exit 0
+[[ "${PINUP_MODE_HOOK_ACTIVE:-0}" == "1" ]] && exit 0
+
+default_mode_file="${PINUP_DEFAULT_MODE_FILE:-${HOME}/.config/omarchy/pinup-mode/default-mode}"
+[[ -f "$default_mode_file" ]] || exit 0
+
+mode=$(tr -d '[:space:]' <"$default_mode_file")
+case "$mode" in
+  light | dark) ;;
+  *) exit 0 ;;
+esac
+
+pinup_mode_command=""
+for candidate in \
+  "${PINUP_USER_THEME_DIR:-${HOME}/.config/omarchy/themes/pinup}/bin/pinup-mode" \
+  "${OMARCHY_PATH:-${HOME}/.local/share/omarchy}/themes/pinup/bin/pinup-mode" \
+  "${HOME}/.config/omarchy/current/theme/bin/pinup-mode"
+do
+  if [[ -x "$candidate" ]]; then
+    pinup_mode_command="$candidate"
+    break
+  fi
+done
+
+[[ -x "$pinup_mode_command" ]] || exit 0
+
+PINUP_MODE_HOOK_ACTIVE=1 PINUP_MODE_SKIP_THEME_HOOKS=1 "$pinup_mode_command" "$mode"
+EOF
+  chmod +x "$default_hook_path"
+}
+
+write_default_mode() {
+  local mode="$1"
+
+  if (( dry_run )); then
+    log "+ mkdir -p $state_dir"
+    log "+ write $default_mode_file = $mode"
+  else
+    mkdir -p "$state_dir"
+    printf '%s\n' "$mode" >"$default_mode_file"
+  fi
+}
+
+path_profile_target() {
+  if [[ -n "$path_profile" ]]; then
+    printf '%s\n' "$path_profile"
+    return
+  fi
+
+  case "$(basename "${SHELL:-}")" in
+    zsh)
+      if [[ -f "$HOME/.zshrc" || ! -e "$HOME/.zprofile" ]]; then
+        printf '%s\n' "$HOME/.zshrc"
+      else
+        printf '%s\n' "$HOME/.zprofile"
+      fi
+      ;;
+    bash)
+      if [[ -f "$HOME/.bashrc" ]]; then
+        printf '%s\n' "$HOME/.bashrc"
+      elif [[ -f "$HOME/.bash_profile" ]]; then
+        printf '%s\n' "$HOME/.bash_profile"
+      else
+        printf '%s\n' "$HOME/.profile"
+      fi
+      ;;
+    *)
+      printf '%s\n' "$HOME/.profile"
+      ;;
+  esac
+}
+
+set_default_mode() {
+  local mode="$1"
+
+  ensure_mode_overlays
+  [[ "$mode" == "light" || "$mode" == "dark" ]] || {
+    log "Invalid default mode: $mode"
+    usage
+    exit 1
+  }
+
+  log "Setting Pinup default mode to $mode"
+  if [[ ! -d "$user_theme_dir" && ! -d "$official_theme_dir" && ! -d "$theme_dir" ]]; then
+    log "Pinup is not installed in $user_theme_dir."
+    log "Install or apply the theme before setting a default mode."
+    exit 1
+  fi
+
+  write_default_mode "$mode"
+  install_default_hook
+
+  if [[ "$theme_dir" == "$active_theme_dir" && -f "$theme_name_file" ]]; then
+    active_name=$(tr -d '[:space:]' <"$theme_name_file")
+    if [[ "$active_name" == "pinup" ]]; then
+      apply_mode "$mode"
+    fi
+  fi
+
+  log "Pinup default mode: $mode"
+}
+
+install_user_commands() {
+  ensure_pinup_target
+
+  local local_bin="${HOME}/.local/bin"
+  local command_path="$local_bin/pinup-mode"
+  local toggle_path="$local_bin/pinup-toggle"
+  local install_source
+  local target_script
+
+  install_source=$(mode_source_dir)
+  target_script="$install_source/bin/pinup-mode"
+  [[ -f "$target_script" ]] || target_script="$theme_dir/bin/pinup-mode"
+  [[ -f "$target_script" ]] || target_script="$script_path"
+
+  log "Installing Pinup mode commands to $local_bin"
+  log "Linking pinup-mode to $target_script"
+  run mkdir -p "$local_bin"
+  run ln -sfn "$target_script" "$command_path"
+  install_default_hook
+
+  if (( dry_run )); then
+    log "+ write $toggle_path"
+    log "+ chmod +x $toggle_path"
+  else
+    cat >"$toggle_path" <<'EOF'
+#!/usr/bin/env bash
+exec pinup-mode toggle "$@"
+EOF
+    chmod +x "$toggle_path"
+  fi
+
+  log "Installed: pinup-mode, pinup-toggle"
+  ensure_local_bin_path "$local_bin"
+}
+
+ensure_local_bin_path() {
+  local local_bin="$1"
+  local profile
+
+  profile=$(path_profile_target)
+
+  if [[ ":$PATH:" != *":$local_bin:"* ]]; then
+    log "$local_bin is not currently in PATH."
+
+    if [[ -f "$profile" ]] && grep -F ".local/bin" "$profile" >/dev/null 2>&1; then
+      log "$profile already references .local/bin; open a new shell or source it."
+      return
+    fi
+
+    log "Adding $local_bin to PATH in $profile"
+    if (( dry_run )); then
+      log "+ write PATH block to $profile"
+    else
+      mkdir -p "$(dirname "$profile")"
+      cat >>"$profile" <<'EOF'
+
+# Pinup mode commands
+case ":$PATH:" in
+  *":$HOME/.local/bin:"*) ;;
+  *) export PATH="$HOME/.local/bin:$PATH" ;;
+esac
+EOF
+    fi
+  fi
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      dry_run=1
+      shift
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+command_name="${1:-}"
+case "$command_name" in
+  light | dark)
+    apply_mode "$command_name"
+    ;;
+  toggle)
+    mode=$(current_mode)
+    if [[ "$mode" == "dark" ]]; then
+      apply_mode light
+    else
+      apply_mode dark
+    fi
+    ;;
+  status)
+    current_mode
+    ;;
+  install)
+    install_user_commands
+    ;;
+  default)
+    default_command="${2:-status}"
+    case "$default_command" in
+      light | dark)
+        set_default_mode "$default_command"
+        ;;
+      status)
+        default_mode
+        ;;
+      *)
+        usage
+        exit 1
+        ;;
+    esac
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+esac

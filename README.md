@@ -2,6 +2,8 @@
 
 Personal configuration for [Omarchy](https://github.com/basecamp/omarchy) (Hyprland-based Arch Linux setup), managed with [GNU Stow](https://www.gnu.org/software/stow/).
 
+> **Note:** These dotfiles are for **Omarchy 4** (currently alpha 2).
+
 ## What's included
 
 | Package | Path | Contents |
@@ -15,41 +17,6 @@ Personal configuration for [Omarchy](https://github.com/basecamp/omarchy) (Hyprl
 ```bash
 curl -sL https://raw.githubusercontent.com/azzenabidi/dotfiles-/main/install.sh | bash
 ```
-
-Or manually:
-
-### 1. Install prerequisites
-
-```bash
-sudo pacman -S --noconfirm git stow
-```
-
-### 2. Clone the repo
-
-```bash
-git clone https://github.com/azzenabidi/dotfiles-.git ~/dotfiles
-```
-
-### 3. Stow the packages
-
-```bash
-cd ~/dotfiles
-stow -v -t ~ hypr google-chrome omarchy
-```
-
-This creates symlinks from `~/.config/` pointing into `~/dotfiles/`.
-
-To stow only specific packages:
-
-```bash
-stow -v -t ~ hypr          # Hyprland only
-stow -v -t ~ omarchy       # Omarchy only
-stow -v -t ~ google-chrome # Chrome native messaging only
-```
-
-### 4. Restart Hyprland
-
-Log out and back in, or restart the compositor to apply changes.
 
 ## Managing dotfiles
 

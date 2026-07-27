@@ -12,6 +12,12 @@ Personal configuration for [Omarchy](https://github.com/basecamp/omarchy) (Hyprl
 
 ## Fresh install
 
+```bash
+curl -sL https://raw.githubusercontent.com/azzenabidi/dotfiles-/main/install.sh | bash
+```
+
+Or manually:
+
 ### 1. Install prerequisites
 
 ```bash

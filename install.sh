@@ -1,0 +1,21 @@
+#!/bin/bash
+set -euo pipefail
+
+DOTFILES_REPO="https://github.com/azzenabidi/dotfiles-.git"
+DOTFILES_DIR="$HOME/dotfiles"
+
+echo "Installing dependencies..."
+sudo pacman -S --noconfirm git stow
+
+if [ -d "$DOTFILES_DIR" ]; then
+  echo "Pulling latest changes..."
+  git -C "$DOTFILES_DIR" pull
+else
+  echo "Cloning dotfiles..."
+  git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+fi
+
+echo "Stowing dotfiles..."
+stow -v -d "$DOTFILES_DIR" -t "$HOME" hypr google-chrome omarchy
+
+echo "Done. Restart Hyprland to apply changes."

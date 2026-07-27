@@ -5,7 +5,7 @@ DOTFILES_REPO="https://github.com/azzenabidi/dotfiles-.git"
 DOTFILES_DIR="$HOME/dotfiles"
 
 echo "Installing dependencies..."
-sudo pacman -S --noconfirm git stow yay aria2 fuse2 flatpak vlc vlc-plugins-all
+sudo pacman -S --noconfirm git stow yay aria2 fuse2 flatpak vlc vlc-plugins-all github-cli
 
 if ! command -v google-chrome &>/dev/null; then
   echo "Installing Google Chrome..."

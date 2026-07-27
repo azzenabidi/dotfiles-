@@ -5,7 +5,12 @@ DOTFILES_REPO="https://github.com/azzenabidi/dotfiles-.git"
 DOTFILES_DIR="$HOME/dotfiles"
 
 echo "Installing dependencies..."
-sudo pacman -S --noconfirm git stow
+sudo pacman -S --noconfirm git stow yay
+
+if ! command -v google-chrome &>/dev/null; then
+  echo "Installing Google Chrome..."
+  yay -S --noconfirm google-chrome
+fi
 
 if [ -d "$DOTFILES_DIR" ]; then
   echo "Pulling latest changes..."

@@ -1,7 +1,7 @@
 {
-  "setup.default.video-player": {"icon":"󰏖","label":"Video Player"},
-  "setup.default.video-player.mpv": {"icon":"","label":"mpv","when":"omarchy-cmd-present mpv","checked":"[[ \"$(omarchy-default-video-player)\" == \"mpv\" ]]","action":"sh -c '$HOME/.local/bin/omarchy-default-video-player mpv'"},
-  "setup.default.video-player.vlc": {"icon":"","label":"VLC","when":"omarchy-cmd-present vlc","checked":"[[ \"$(omarchy-default-video-player)\" == \"vlc\" ]]","action":"sh -c '$HOME/.local/bin/omarchy-default-video-player vlc'"},
-  "setup.default.video-player.celluloid": {"icon":"","label":"Celluloid","when":"omarchy-cmd-present celluloid","checked":"[[ \"$(omarchy-default-video-player)\" == \"celluloid\" ]]","action":"sh -c '$HOME/.local/bin/omarchy-default-video-player celluloid'"},
-  "setup.default.video-player.totem": {"icon":"","label":"Totem","when":"omarchy-cmd-present totem","checked":"[[ \"$(omarchy-default-video-player)\" == \"totem\" ]]","action":"sh -c '$HOME/.local/bin/omarchy-default-video-player totem'"}
+  "setup.default.video-player": {"icon":"󰈫","label":"Video Player"},
+  "setup.default.video-player.mpv": {"icon":"󰈫","label":"MPV","when":"omarchy-cmd-present mpv","checked":"[[ \"$(omarchy-default-video-player)\" == \"mpv\" ]]","action":"sh -c '$HOME/.local/bin/omarchy-default-video-player mpv'"},
+  "setup.default.video-player.vlc": {"icon":"󰕼","label":"VLC","when":"omarchy-cmd-present vlc","checked":"[[ \"$(omarchy-default-video-player)\" == \"vlc\" ]]","action":"sh -c '$HOME/.local/bin/omarchy-default-video-player vlc'"},
+  "setup.default.video-player.celluloid": {"icon":"󰈫","label":"Celluloid","when":"omarchy-cmd-present celluloid","checked":"[[ \"$(omarchy-default-video-player)\" == \"celluloid\" ]]","action":"sh -c '$HOME/.local/bin/omarchy-default-video-player celluloid'"},
+  "setup.default.video-player.totem": {"icon":"󰈫","label":"Totem","when":"omarchy-cmd-present totem","checked":"[[ \"$(omarchy-default-video-player)\" == \"totem\" ]]","action":"sh -c '$HOME/.local/bin/omarchy-default-video-player totem'"}
 }

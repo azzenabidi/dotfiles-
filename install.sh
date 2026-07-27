@@ -23,4 +23,9 @@ fi
 echo "Stowing dotfiles..."
 stow -v -d "$DOTFILES_DIR" -t "$HOME" hypr google-chrome omarchy
 
+echo "Installing local binaries..."
+mkdir -p "$HOME/.local/bin"
+cp -v "$DOTFILES_DIR"/local/bin/* "$HOME/.local/bin/"
+chmod +x "$HOME/.local/bin/"*
+
 echo "Done. Restart Hyprland to apply changes."

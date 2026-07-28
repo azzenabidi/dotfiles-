@@ -31,5 +31,6 @@ o.bind("SUPER + E", "Neovim", "uwsm-app -- xdg-terminal-exec nvim")
 -- VLC on Super+Shift+V
 o.bind("SUPER + SHIFT + V", "VLC", "uwsm-app -- vlc")
 
-
+-- Omawrite on Super+Shift+T
+o.bind("SUPER + SHIFT + T", "Omawrite", "uwsm-app -- omawrite")
 

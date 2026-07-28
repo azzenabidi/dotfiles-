@@ -28,3 +28,5 @@ o.bind("SUPER + N", "Neovim Cheatsheet", "uwsm-app -- /home/azzen/.local/bin/neo
 -- Neovim on Super+E
 o.bind("SUPER + E", "Neovim", "uwsm-app -- xdg-terminal-exec nvim")
 
+
+

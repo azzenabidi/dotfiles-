@@ -28,5 +28,8 @@ o.bind("SUPER + N", "Neovim Cheatsheet", "uwsm-app -- /home/azzen/.local/bin/neo
 -- Neovim on Super+E
 o.bind("SUPER + E", "Neovim", "uwsm-app -- xdg-terminal-exec nvim")
 
+-- VLC on Super+Shift+V
+o.bind("SUPER + SHIFT + V", "VLC", "uwsm-app -- vlc")
+
 
 

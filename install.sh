@@ -30,8 +30,8 @@ mkdir -p "$HOME/.config"
 mkdir -p "$HOME/.local/bin"
 
 echo "Stowing dotfiles..."
-stow -D -v -d "$DOTFILES_DIR" -t "$HOME" --no-folding hypr omarchy
-stow -v -d "$DOTFILES_DIR" -t "$HOME" --no-folding hypr omarchy
+stow -D -v -d "$DOTFILES_DIR" -t "$HOME" --no-folding hypr omarchy opencode
+stow -v -d "$DOTFILES_DIR" -t "$HOME" --no-folding hypr omarchy opencode
 
 echo "Installing local binaries..."
 if ls "$DOTFILES_DIR"/local/bin/* &>/dev/null; then

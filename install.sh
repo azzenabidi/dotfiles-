@@ -20,12 +20,20 @@ else
   git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
 fi
 
+if ! command -v stow &>/dev/null; then
+  echo "GNU Stow not found, installing..."
+  sudo pacman -S --noconfirm stow
+fi
+
+echo "Ensuring target directories exist..."
+mkdir -p "$HOME/.config"
+mkdir -p "$HOME/.local/bin"
+
 echo "Stowing dotfiles..."
-stow -D -v -d "$DOTFILES_DIR" -t "$HOME" hypr google-chrome omarchy
-stow -v -d "$DOTFILES_DIR" -t "$HOME" hypr google-chrome omarchy
+stow -D -v -d "$DOTFILES_DIR" -t "$HOME" --no-folding hypr google-chrome omarchy
+stow -v -d "$DOTFILES_DIR" -t "$HOME" --no-folding hypr google-chrome omarchy
 
 echo "Installing local binaries..."
-mkdir -p "$HOME/.local/bin"
 cp -v "$DOTFILES_DIR"/local/bin/* "$HOME/.local/bin/"
 chmod +x "$HOME/.local/bin/"*
 

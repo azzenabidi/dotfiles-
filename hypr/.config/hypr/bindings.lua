@@ -34,3 +34,6 @@ o.bind("SUPER + SHIFT + V", "VLC", "uwsm-app -- vlc")
 -- Omawrite on Super+Shift+T
 o.bind("SUPER + SHIFT + T", "Omawrite", "uwsm-app -- omawrite")
 
+-- Windows VM on Super+W
+o.bind("SUPER + W", "Windows VM", { launch = "omarchy-windows-vm launch" })
+

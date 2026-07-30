@@ -1,1 +1,3 @@
-**/Login Data*
+# Chrome stores its entire profile here — cache, databases, sessions, etc.
+# Only track specific config files manually if needed.
+google-chrome/

@@ -39,4 +39,6 @@ if ls "$DOTFILES_DIR"/local/bin/* &>/dev/null; then
   chmod +x "$HOME/.local/bin/"*
 fi
 
-echo "Done. Restart Hyprland to apply changes."
+echo "Done. Reloading Hyprland and restarting shell bar..."
+hyprctl reload
+omarchy-restart-shell

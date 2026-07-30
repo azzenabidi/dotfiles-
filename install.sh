@@ -30,11 +30,13 @@ mkdir -p "$HOME/.config"
 mkdir -p "$HOME/.local/bin"
 
 echo "Stowing dotfiles..."
-stow -D -v -d "$DOTFILES_DIR" -t "$HOME" --no-folding hypr google-chrome omarchy
-stow -v -d "$DOTFILES_DIR" -t "$HOME" --no-folding hypr google-chrome omarchy
+stow -D -v -d "$DOTFILES_DIR" -t "$HOME" --no-folding hypr omarchy
+stow -v -d "$DOTFILES_DIR" -t "$HOME" --no-folding hypr omarchy
 
 echo "Installing local binaries..."
-cp -v "$DOTFILES_DIR"/local/bin/* "$HOME/.local/bin/"
-chmod +x "$HOME/.local/bin/"*
+if ls "$DOTFILES_DIR"/local/bin/* &>/dev/null; then
+  cp -v "$DOTFILES_DIR"/local/bin/* "$HOME/.local/bin/"
+  chmod +x "$HOME/.local/bin/"*
+fi
 
 echo "Done. Restart Hyprland to apply changes."

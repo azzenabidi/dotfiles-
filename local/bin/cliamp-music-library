@@ -1,0 +1,3 @@
+#!/bin/bash
+cliamp playlist add "Music Library" ~/Music >/dev/null 2>&1
+exec cliamp --playlist "Music Library"

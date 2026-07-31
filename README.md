@@ -11,6 +11,7 @@ Personal configuration for [Omarchy](https://github.com/basecamp/omarchy) (Hyprl
 | `hypr` | `.config/hypr/` | Hyprland window manager config (keybindings, monitors, appearance, input, idle/lock, etc.) |
 | `google-chrome` | `.config/google-chrome/NativeMessagingHosts/` | Native messaging host configs for Omarchy extensions (copy URL, ytdlp) |
 | `omarchy` | `.config/omarchy/` | Omarchy shell, branding, extensions, hooks, themes, and Alacritty template |
+| `cliamp` | `.config/cliamp/` | cliamp music player config (visualizer) and Lua plugin for persisting YouTube tracks |
 
 ## Fresh install
 

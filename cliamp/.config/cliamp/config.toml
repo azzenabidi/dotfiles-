@@ -1,0 +1,4 @@
+# Visualizer mode: Wave (oscilloscope-style waveform reacting to audio)
+visualizer = "Wave"
+
+theme = ""

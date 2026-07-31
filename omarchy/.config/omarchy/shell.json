@@ -7,10 +7,12 @@
           "id": "omarchy.indicators"
         },
         {
+          "id": "omarchy.clock",
           "format": "dddd HH:mm",
           "formatAlt": "d MMMM 'W'ww yyyy",
-          "id": "omarchy.clock",
-          "verticalFormat": "HH\n—\nmm"
+          "verticalFormat": "HH\n—\nmm",
+          "birthYear": 1992,
+          "lifeExpectancy": 87
         },
         {
           "id": "omarchy.weather",
@@ -67,5 +69,6 @@
     "lock": 152,
     "screensaver": 150
   },
-  "version": 1
+  "version": 1,
+  "plugins": []
 }

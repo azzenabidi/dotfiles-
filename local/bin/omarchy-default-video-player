@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# omarchy:summary=Set the default video player for XDG handlers
+# omarchy:args=[vlc|mpv|celluloid|totem]
+# omarchy:examples=omarchy-default-video-player vlc | omarchy-default-video-player mpv
+
+VIDEO_MIMES=(
+  video/3gp video/3gpp video/3gpp2 video/avi video/divx video/fli video/flv
+  video/mp2t video/mp4 video/mp4v-es video/mpeg video/msvideo video/ogg
+  video/quicktime video/vnd.divx video/vnd.mpegurl video/vnd.rn-realvideo
+  video/webm video/x-avi video/x-flic video/x-flv video/x-matroska
+  video/x-m4v video/x-ms-afs video/x-ms-asf video/x-ms-wmx video/x-ms-wmv
+  video/x-msvideo video/x-mpeg2 video/x-mpeg3 video/x-ogm video/x-ogm+ogg
+  video/x-theora video/x-theora+ogg video/x-wmv
+)
+
+if (($# == 0)); then
+  desktop_id=$(xdg-mime query default video/mp4)
+  [[ -n $desktop_id ]] || desktop_id=$(xdg-mime query default video/x-matroska)
+  [[ -n $desktop_id ]] || desktop_id=$(xdg-mime query default video/webm)
+  case "$desktop_id" in
+  vlc.desktop) echo "vlc" ;;
+  mpv.desktop) echo "mpv" ;;
+  io.github.celluloid_player.Celluloid.desktop|org.gnome.Celluloid.desktop) echo "celluloid" ;;
+  org.gnome.Totem.desktop) echo "totem" ;;
+  *) echo "$desktop_id" ;;
+  esac
+  exit 0
+fi
+
+case "$1" in
+vlc) desktop_id="vlc.desktop"; name="VLC"; glyph=󰕼 ;;
+mpv) desktop_id="mpv.desktop"; name="MPV"; glyph=󰈫 ;;
+celluloid) desktop_id="io.github.celluloid_player.Celluloid.desktop"; name="Celluloid"; glyph=󰈫 ;;
+totem) desktop_id="org.gnome.Totem.desktop"; name="Totem"; glyph=󰈫 ;;
+*)
+  echo "Usage: omarchy-default-video-player <vlc|mpv|celluloid|totem>"
+  exit 1
+  ;;
+esac
+
+for mime in "${VIDEO_MIMES[@]}"; do
+  xdg-mime default "$desktop_id" "$mime" || exit 1
+done
+
+omarchy-notification-send -g $glyph "$name is now the default video player"

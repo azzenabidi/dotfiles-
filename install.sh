@@ -12,6 +12,15 @@ if ! command -v google-chrome &>/dev/null; then
   yay -S --noconfirm google-chrome
 fi
 
+if ! command -v VBoxManage &>/dev/null; then
+  echo "Installing VirtualBox..."
+  sudo pacman -S --needed --noconfirm virtualbox virtualbox-host-dkms vde2 virtualbox-guest-iso virtualbox-ext-vnc virtualbox-sdk
+  sudo usermod -aG vboxusers "$USER"
+  sudo modprobe vboxdrv
+  sudo modprobe vboxnetadp
+  sudo modprobe vboxnetflt
+fi
+
 if [ -d "$DOTFILES_DIR" ]; then
   echo "Pulling latest changes..."
   git -C "$DOTFILES_DIR" pull

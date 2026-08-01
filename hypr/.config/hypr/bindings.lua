@@ -40,7 +40,4 @@ o.bind("SUPER + W", "Windows VM", { launch = "omarchy-windows-vm launch" })
 -- Music Library on Super+Shift+M
 o.bind("SUPER + SHIFT + M", "Music Library", "uwsm-app -- xdg-terminal-exec /home/azzen/.local/bin/cliamp-music-library")
 
--- USB ISO Burner on Super+I
-o.bind("SUPER + I", "USB ISO Burner", "uwsm-app -- xdg-terminal-exec ~/.local/bin/burn-iso")
-
 

@@ -1,0 +1,4 @@
+#!/bin/bash
+# Keep the active keyboard layout across lock/suspend (see ~/.local/bin/omarchy-layout-persist).
+pkill -f omarchy-layout-persist 2>/dev/null
+nohup "$HOME/.local/bin/omarchy-layout-persist" >/dev/null 2>&1 &

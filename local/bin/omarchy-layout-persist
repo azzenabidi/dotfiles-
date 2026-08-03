@@ -1,0 +1,60 @@
+#!/bin/bash
+# omarchy-layout-persist — keep the active keyboard layout across lock/suspend.
+#
+# Omarchy resets every keyboard to the first layout when locking, and Hyprland
+# also resets it when keyboard devices are re-created on resume. This daemon
+# remembers the layout the user leaves while unlocked and switches back to it
+# the moment the lock screen goes away.
+#
+# It tracks the active layout index of the physical keyboard in a state file
+# under ~/.local/state/omarchy/layout-index and restores that index on the
+# locked -> unlocked transition. While locked the value is left untouched so a
+# layout reset cannot clobber the snapshot.
+
+state_dir="$HOME/.local/state/omarchy"
+state="$state_dir/layout-index"
+mkdir -p "$state_dir"
+
+read_idx() {
+  hyprctl devices -j 2>/dev/null | python3 -c "
+import json, sys
+try:
+    d = json.load(sys.stdin)
+    for k in d.get('keyboards', []):
+        if 'at-translated' in k.get('name', ''):
+            print(k.get('active_layout_index', 0))
+            break
+except Exception:
+    pass
+" 2>/dev/null
+}
+
+prev_locked=""
+last_layout=""
+
+while true; do
+  locked=$(omarchy-shell lock isLocked 2>/dev/null || echo unknown)
+  idx=$(read_idx)
+
+  if [[ $prev_locked == "true" && $locked != "true" ]]; then
+    # Locked -> unlocked: restore the layout that was active before locking.
+    saved=$(cat "$state" 2>/dev/null)
+    if [[ -n $saved ]]; then
+      hyprctl switchxkblayout all "$saved" 2>/dev/null
+    fi
+    idx=$(read_idx)
+  fi
+
+  if [[ $locked != "true" ]]; then
+    # Unlocked: remember the layout as the user leaves it.
+    last_layout=$idx
+    printf '%s\n' "$idx" > "$state"
+  elif [[ $prev_locked != "true" ]]; then
+    # Just locked: re-affirm the layout from before locking, in case the lock
+    # already reset the keyboards (omarchy-system-lock runs switchxkblayout).
+    printf '%s\n' "${last_layout:-0}" > "$state"
+  fi
+
+  prev_locked=$locked
+  sleep 0.5
+done

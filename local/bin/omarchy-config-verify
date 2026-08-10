@@ -1,14 +1,13 @@
 #!/bin/bash
 # omarchy:group=config
 # omarchy:name=verify
-# omarchy:summary=Check configs still match ~/dotfiles and restore anything an update changed
+# omarchy:summary=Check configs still match your dotfiles repo and restore anything an update changed
 # omarchy:args=[--apply]
 # omarchy:examples=omarchy-config-verify | omarchy-config-verify --apply
 
-# Keeps your configs in sync with the dotfiles repo (the source of truth).
+# Keeps your configs in sync with a git dotfiles repo (the source of truth).
 # Default mode only reports drift; --apply restores it, backing up first.
-# The post-update hook runs this with --apply so every `omarchy update`
-# re-applies your changes if a migration or package touched them.
+# Install the post-update hook so every `omarchy update` runs it automatically.
 #
 # Safety rule: if a drifted live file is NEWER than the last repo commit that
 # touched it, it is probably an uncommitted change or a new omarchy feature,
@@ -16,23 +15,30 @@
 
 set -euo pipefail
 
+VERSION="1.0.0"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+BACKUP_BASE="${VERIFY_BACKUP_DIR:-$HOME/.dotfiles-verify-backup}"
 APPLY=0
 
 case "${1:-}" in
   --apply) APPLY=1 ;;
+  --version|-V) echo "omarchy-config-verify $VERSION"; exit 0 ;;
   --help|-h)
     echo "Usage: omarchy-config-verify [--apply]"
-    echo "  Compare live configs against $DOTFILES_DIR and report drift."
+    echo "  Compare live configs against \$DOTFILES_DIR ($DOTFILES_DIR) and report drift."
     echo "  With --apply, restore any config that no longer matches (backing up first)."
     echo "  Files newer than the repo are kept and reported, never overwritten."
+    echo
+    echo "Environment:"
+    echo "  DOTFILES_DIR        dotfiles repo to verify against (default: ~/dotfiles)"
+    echo "  VERIFY_BACKUP_DIR   backup location for overwritten files (default: ~/.dotfiles-verify-backup)"
     exit 0
     ;;
 esac
 
 [[ -d "$DOTFILES_DIR/.git" ]] || { echo "error: dotfiles repo not found at $DOTFILES_DIR" >&2; exit 1; }
 
-BACKUP_DIR="$HOME/.dotfiles-verify-backup/$(date +%Y%m%d-%H%M%S)"
+BACKUP_DIR="$BACKUP_BASE/$(date +%Y%m%d-%H%M%S)"
 DRIFT=0
 RESTORED=0
 CONFLICTS=()
@@ -50,7 +56,7 @@ live_newer() {
 }
 
 # Map a repo path to its live location. `local/bin/*` installs to
-# ~/.local/bin; every other package dir stows straight into $HOME.
+# ~/.local/bin; every other package dir is stowed straight into $HOME.
 repo_target() {
   local repo_file="$1"
   local pkg="${repo_file%%/*}"
@@ -117,7 +123,7 @@ else
 fi
 for repo_file in $(git -C "$DOTFILES_DIR" ls-files); do
   case "$repo_file" in
-    install.sh|README.md|LICENSE|.gitignore) continue ;;
+    install.sh|README.md|LICENSE|.gitignore|omarchy-config-verify) continue ;;
   esac
   check_one "$repo_file" "$DOTFILES_DIR/$repo_file" "$(repo_target "$repo_file")"
 done

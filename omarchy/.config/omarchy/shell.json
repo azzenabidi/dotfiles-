@@ -35,7 +35,7 @@
           "id": "omarchy.tray"
         },
         {
-          "id": "omarchy.model-usage"
+          "id": "omarchy.agents"
         },
         {
           "id": "omarchy.bluetooth"
@@ -50,12 +50,7 @@
           "id": "omarchy.monitor"
         },
         {
-          "id": "kb-layout",
-          "type": "command",
-          "exec": "~/.config/omarchy/bar/scripts/kb-layout.sh",
-          "interval": 1,
-          "tooltip": "Keyboard layout (click to switch)",
-          "onClick": "hyprctl switchxkblayout current next"
+          "id": "azzen.keyboard-layout"
         },
         {
           "id": "omarchy.power"

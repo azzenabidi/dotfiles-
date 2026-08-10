@@ -40,4 +40,7 @@ o.bind("SUPER + W", "Windows VM", { launch = "omarchy-windows-vm launch" })
 -- Music Library on Super+Shift+M
 o.bind("SUPER + SHIFT + M", "Music Library", "uwsm-app -- xdg-terminal-exec /home/azzen/.local/bin/cliamp-music-library")
 
+-- Hexlog on Super+Shift+H
+o.bind("SUPER + SHIFT + H", "Hexlog", { launch = "hexlog" })
+
 

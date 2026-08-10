@@ -1,0 +1,114 @@
+#!/bin/bash
+# omarchy:group=config
+# omarchy:name=verify
+# omarchy:summary=Check configs still match ~/dotfiles and restore anything an update changed
+# omarchy:args=[--apply]
+# omarchy:examples=omarchy-config-verify | omarchy-config-verify --apply
+
+# Keeps your configs in sync with the dotfiles repo (the source of truth).
+# Default mode only reports drift; --apply restores it, backing up first.
+# The post-update hook runs this with --apply so every `omarchy update`
+# re-applies your changes if a migration or package touched them.
+
+set -euo pipefail
+
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+APPLY=0
+
+case "${1:-}" in
+  --apply) APPLY=1 ;;
+  --help|-h)
+    echo "Usage: omarchy-config-verify [--apply]"
+    echo "  Compare live configs against $DOTFILES_DIR and report drift."
+    echo "  With --apply, restore any config that no longer matches (backing up first)."
+    exit 0
+    ;;
+esac
+
+[[ -d "$DOTFILES_DIR/.git" ]] || { echo "error: dotfiles repo not found at $DOTFILES_DIR" >&2; exit 1; }
+
+BACKUP_DIR="$HOME/.dotfiles-verify-backup/$(date +%Y%m%d-%H%M%S)"
+DRIFT=0
+RESTORED=0
+
+# Map a repo path to its live location. `local/bin/*` installs to
+# ~/.local/bin; every other package dir stows straight into $HOME.
+repo_target() {
+  local repo_file="$1"
+  local pkg="${repo_file%%/*}"
+  local rest="${repo_file#"$pkg"/}"
+  if [[ $pkg == "local" && $rest == bin/* ]]; then
+    printf '%s' "$HOME/.local/bin/${rest#bin/}"
+  else
+    printf '%s' "$HOME/$rest"
+  fi
+}
+
+restore_one() {
+  local repo_file="$1" repo_path="$2" target="$3"
+  DRIFT=1
+  if (( APPLY )); then
+    local was_link=0
+    [[ -L "$target" ]] && was_link=1
+    if [[ -e "$target" || -L "$target" ]]; then
+      mkdir -p "$BACKUP_DIR/$(dirname "$repo_file")"
+      cp -a "$target" "$BACKUP_DIR/$repo_file"
+    fi
+    mkdir -p "$(dirname "$target")"
+    rm -f "$target"
+    if (( was_link )); then
+      ln -s "$repo_path" "$target"
+    else
+      cp "$repo_path" "$target"
+    fi
+    echo "  restored: $target"
+    RESTORED=$((RESTORED + 1))
+  fi
+}
+
+check_one() {
+  local repo_file="$1" repo_path="$2" target="$3"
+
+  # Valid symlink to the repo file, or a real file with identical content.
+  if [[ -e "$target" || -L "$target" ]]; then
+    local resolved
+    resolved=$(realpath "$target" 2>/dev/null || true)
+    [[ -n $resolved && $resolved == "$(realpath "$repo_path")" ]] && return 0
+    if [[ -f "$target" ]] && cmp -s "$repo_path" "$target"; then
+      return 0
+    fi
+  fi
+
+  if [[ -e "$target" || -L "$target" ]]; then
+    echo "drift: $target differs from $repo_path"
+  else
+    echo "missing: $target (not installed)"
+  fi
+  restore_one "$repo_file" "$repo_path" "$target"
+}
+
+if (( APPLY )); then
+  echo "Verifying configs against $DOTFILES_DIR and restoring any drift..."
+else
+  echo "Verifying configs against $DOTFILES_DIR... (report-only; use --apply to restore)"
+fi
+for repo_file in $(git -C "$DOTFILES_DIR" ls-files); do
+  case "$repo_file" in
+    install.sh|README.md|LICENSE|.gitignore) continue ;;
+  esac
+  check_one "$repo_file" "$DOTFILES_DIR/$repo_file" "$(repo_target "$repo_file")"
+done
+
+if (( DRIFT )); then
+  if (( APPLY )); then
+    echo "Restored $RESTORED file(s) from $DOTFILES_DIR."
+    echo "Backups of the changed versions: $BACKUP_DIR"
+    echo "Run 'git -C $DOTFILES_DIR status' if you need to commit the source of truth."
+    exit 0
+  else
+    echo "Configs differ from $DOTFILES_DIR. Run 'omarchy-config-verify --apply' to restore."
+    exit 1
+  fi
+fi
+
+echo "All configs match $DOTFILES_DIR."

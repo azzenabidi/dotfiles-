@@ -9,6 +9,10 @@
 # Default mode only reports drift; --apply restores it, backing up first.
 # The post-update hook runs this with --apply so every `omarchy update`
 # re-applies your changes if a migration or package touched them.
+#
+# Safety rule: if a drifted live file is NEWER than the last repo commit that
+# touched it, it is probably an uncommitted change or a new omarchy feature,
+# so it is kept and reported (with a notification) instead of being reverted.
 
 set -euo pipefail
 
@@ -21,6 +25,7 @@ case "${1:-}" in
     echo "Usage: omarchy-config-verify [--apply]"
     echo "  Compare live configs against $DOTFILES_DIR and report drift."
     echo "  With --apply, restore any config that no longer matches (backing up first)."
+    echo "  Files newer than the repo are kept and reported, never overwritten."
     exit 0
     ;;
 esac
@@ -30,6 +35,19 @@ esac
 BACKUP_DIR="$HOME/.dotfiles-verify-backup/$(date +%Y%m%d-%H%M%S)"
 DRIFT=0
 RESTORED=0
+CONFLICTS=()
+
+# True when the live file was modified after the repo's last commit that
+# touched it — i.e. the live version is newer than what we would restore.
+live_newer() {
+  local repo_file="$1" target="$2"
+  [[ -e "$target" ]] || return 1
+  local live_mtime
+  live_mtime=$(stat -c %Y "$target" 2>/dev/null || echo 0)
+  local repo_commit
+  repo_commit=$(git -C "$DOTFILES_DIR" log -1 --format=%ct -- "$repo_file" 2>/dev/null || echo 0)
+  (( live_mtime > repo_commit ))
+}
 
 # Map a repo path to its live location. `local/bin/*` installs to
 # ~/.local/bin; every other package dir stows straight into $HOME.
@@ -48,6 +66,11 @@ restore_one() {
   local repo_file="$1" repo_path="$2" target="$3"
   DRIFT=1
   if (( APPLY )); then
+    if live_newer "$repo_file" "$target"; then
+      echo "  kept: $target is newer than the dotfiles repo (not overwritten)"
+      CONFLICTS+=("$target")
+      return
+    fi
     local was_link=0
     [[ -L "$target" ]] && was_link=1
     if [[ -e "$target" || -L "$target" ]]; then
@@ -101,8 +124,21 @@ done
 
 if (( DRIFT )); then
   if (( APPLY )); then
-    echo "Restored $RESTORED file(s) from $DOTFILES_DIR."
-    echo "Backups of the changed versions: $BACKUP_DIR"
+    if (( RESTORED )); then
+      echo "Restored $RESTORED file(s) from $DOTFILES_DIR."
+      echo "Backups of the changed versions: $BACKUP_DIR"
+    fi
+    if (( ${#CONFLICTS[@]} )); then
+      echo "Kept ${#CONFLICTS[@]} file(s) that are newer than the dotfiles repo:"
+      printf '  %s\n' "${CONFLICTS[@]}"
+      echo "Review and commit them ('git -C $DOTFILES_DIR status'), or delete them and re-run --apply to restore the repo version."
+      if command -v omarchy-notification-send &>/dev/null; then
+        omarchy-notification-send -u normal -a dotfiles-verify \
+          "${#CONFLICTS[@]} config file(s) are newer than dotfiles" \
+          "Not overwritten. Review them to decide: commit to dotfiles or restore the repo version."
+      fi
+      exit 1
+    fi
     echo "Run 'git -C $DOTFILES_DIR status' if you need to commit the source of truth."
     exit 0
   else

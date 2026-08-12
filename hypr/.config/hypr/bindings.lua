@@ -20,7 +20,7 @@ o.bind("SUPER + Q", "Close window", hl.dsp.window.close())
 
 -- OpenCode on Super+Shift+O (overrides default Obsidian)
 hl.unbind("SUPER + SHIFT + O")
-o.bind("SUPER + SHIFT + O", "OpenCode", "uwsm-app -- xdg-terminal-exec --dir=\"$HOME\" opencode")
+o.bind("SUPER + SHIFT + O", "OpenCode", "uwsm-app -- xdg-terminal-exec --dir=\"$HOME\" opencode --auto")
 
 -- Neovim Cheatsheet on Super+N
 o.bind("SUPER + N", "Neovim Cheatsheet", "uwsm-app -- /home/azzen/.local/bin/neovim-cheatsheet")

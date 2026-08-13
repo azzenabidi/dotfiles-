@@ -59,6 +59,13 @@ echo "Stowing dotfiles..."
 stow -D -v -d "$DOTFILES_DIR" -t "$HOME" --no-folding "${PACKAGES[@]}"
 stow -v -d "$DOTFILES_DIR" -t "$HOME" --no-folding "${PACKAGES[@]}"
 
+# sudoers.d files must be root-owned mode 0440, so this can't be stowed.
+echo "Installing sudoers pwfeedback (asterisk echo on sudo password prompts)..."
+sudo install -o root -g root -m 0440 \
+  "$DOTFILES_DIR/sudoers/etc/sudoers.d/pwfeedback" \
+  /etc/sudoers.d/pwfeedback
+sudo visudo -c
+
 echo "Installing local binaries..."
 if ls "$DOTFILES_DIR"/local/bin/* &>/dev/null; then
   cp -v "$DOTFILES_DIR"/local/bin/* "$HOME/.local/bin/"

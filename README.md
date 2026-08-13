@@ -12,6 +12,7 @@ Personal configuration for [Omarchy](https://github.com/basecamp/omarchy) (Hyprl
 | `google-chrome` | `.config/google-chrome/NativeMessagingHosts/` | Native messaging host configs for Omarchy extensions (copy URL, ytdlp) |
 | `omarchy` | `.config/omarchy/` | Omarchy shell, branding, extensions, hooks, themes, and Alacritty template |
 | `cliamp` | `.config/cliamp/` | cliamp music player config (visualizer) and Lua plugin for persisting YouTube tracks |
+| `sudoers` | `etc/sudoers.d/` | `pwfeedback` — echo `*` per keystroke on sudo password prompts |
 
 ## Fresh install
 
@@ -30,6 +31,8 @@ $EDITOR ~/dotfiles/hypr/.config/hypr/hyprland.conf
 # Changes take effect after restart or manual reload
 hyprctl reload
 ```
+
+`sudoers` is not stowed (sudo requires root-owned mode 0440 files) — `install.sh` copies it to `/etc/sudoers.d/`. Remove it with `sudo rm /etc/sudoers.d/pwfeedback`.
 
 ## Undoing stow
 

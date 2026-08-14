@@ -271,13 +271,21 @@ Panel {
     root.updateLayouts()
   }
 
+  function displayLabel(value) {
+    var code = String(value || "").trim()
+    return code === "ara" || code === "ARA" || code === "Arabic"
+      || code === "ARABIC"
+      ? "AR"
+      : code.toUpperCase()
+  }
+
   function updateLayouts() {
     var nextLayouts = root.configuredLayouts.length > 0
       ? root.configuredLayouts
       : root.deviceLayouts
     var nextLabel = nextLayouts[root.activeLayoutIndex]
-      ? String(nextLayouts[root.activeLayoutIndex]).toUpperCase()
-      : root.layoutFull.split(/\s+/)[0].substring(0, 3).toUpperCase()
+      ? root.displayLabel(nextLayouts[root.activeLayoutIndex])
+      : root.displayLabel(root.layoutFull.split(/\s+/)[0])
     var changed = root.layoutLabel !== "" && root.layoutLabel !== nextLabel
 
     root.layouts = nextLayouts
@@ -559,7 +567,7 @@ Panel {
               required property var modelData
               required property int index
               width: layoutColumn.width
-              text: String(modelData).toUpperCase()
+              text: root.displayLabel(modelData)
               foreground: root.bar.foreground
               fontFamily: root.bar.fontFamily
               fontSize: Style.font.bodySmall

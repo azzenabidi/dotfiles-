@@ -43,4 +43,12 @@ o.bind("SUPER + SHIFT + M", "Music Library", "uwsm-app -- xdg-terminal-exec /hom
 -- Hexlog on Super+Shift+H
 o.bind("SUPER + SHIFT + H", "Hexlog", { launch = "hexlog" })
 
+-- Switch keyboard layout (French/Arabic) with Alt+Shift, either key order.
+-- non_consuming keeps the combo from triggering Alt menus in apps.
+o.bind("ALT + SHIFT_L", "Switch keyboard layout", "hyprctl switchxkblayout all next", { non_consuming = true })
+o.bind("ALT + SHIFT_R", "Switch keyboard layout", "hyprctl switchxkblayout all next", { non_consuming = true })
+o.bind("SHIFT + ALT_L", "Switch keyboard layout", "hyprctl switchxkblayout all next", { non_consuming = true })
+o.bind("SHIFT + ALT_R", "Switch keyboard layout", "hyprctl switchxkblayout all next", { non_consuming = true })
 
+-- TEMP TEST BIND
+hl.bind("SUPER + code:28", hl.dsp.exec_cmd("touch /tmp/kb_bind_test2"))

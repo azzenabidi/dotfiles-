@@ -56,11 +56,12 @@
 -- hl.gesture({ fingers = 3, direction = "left", action = function() hl.dispatch(hl.dsp.focus({ direction = "l" })) end })
 -- hl.gesture({ fingers = 3, direction = "right", action = function() hl.dispatch(hl.dsp.focus({ direction = "r" })) end })
 
--- Custom keyboard settings (migrated from Omarchy 3)
+-- Custom keyboard settings (migrated from Omarchy 3).
+-- Layouts: French, Arabic. Switching is bound to Alt+Shift in bindings.lua
+-- (Hyprland's grp:alt_shift_toggle xkb option does not toggle layouts).
 hl.config({
   input = {
     kb_layout = "fr, ara",
-    kb_options = "grp:alt_shift_toggle",
     repeat_rate = 40,
     repeat_delay = 250,
     numlock_by_default = true,

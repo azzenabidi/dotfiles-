@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh opencode usage for the omarchy agents panel
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

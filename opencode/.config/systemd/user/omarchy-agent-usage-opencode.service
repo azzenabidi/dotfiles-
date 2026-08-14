@@ -1,0 +1,10 @@
+[Unit]
+Description=Collect opencode usage for the omarchy agents panel
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/omarchy-agent-usage-opencode
+Nice=10
+
+[Install]
+WantedBy=default.target

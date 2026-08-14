@@ -47,7 +47,7 @@ BarWidget {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: "\uf120"
+    text: "\uf06a9"
     slotSize: Style.bar.statusSlot
     fontSize: Style.font.caption
     tooltipText: root.agentActive

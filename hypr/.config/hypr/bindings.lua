@@ -44,6 +44,14 @@ o.bind("SUPER + SHIFT + M", "Music Library", "uwsm-app -- xdg-terminal-exec /hom
 -- Hexlog on Super+Shift+H
 o.bind("SUPER + SHIFT + H", "Hexlog", { launch = "hexlog" })
 
+-- Gemini web app on Super+Shift+G (was: Signal)
+hl.unbind("SUPER + SHIFT + G")
+o.bind("SUPER + SHIFT + G", "Gemini", { webapp = "https://gemini.google.com", focus = true })
+
+-- ChatGPT web app on Super+Shift+A: focus if already open
+hl.unbind("SUPER + SHIFT + A")
+o.bind("SUPER + SHIFT + A", "ChatGPT", { webapp = "https://chatgpt.com", focus = true })
+
 -- Switch keyboard layout (French/Arabic) with Alt+Shift, either key order.
 -- non_consuming keeps the combo from triggering Alt menus in apps.
 o.bind("ALT + SHIFT_L", "Switch keyboard layout", "hyprctl switchxkblayout all next", { non_consuming = true })

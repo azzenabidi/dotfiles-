@@ -8,7 +8,6 @@ BarWidget {
   id: root
   moduleName: "azzen.agent-active"
 
-  readonly property string agents: "opencode claude codex gemini copilot crush grok omp pi"
   property bool agentActive: false
   property string activeAgents: ""
 
@@ -18,29 +17,17 @@ BarWidget {
     root.activeAgents = names.join(", ")
   }
 
-  function refresh() {
-    if (!detectProc.running) detectProc.running = true
-  }
-
   visible: agentActive
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
 
   Process {
-    id: detectProc
-    command: ["sh", "-c", "for p in opencode claude codex gemini copilot crush grok omp pi; do pgrep -x \"$p\" >/dev/null 2>&1 && printf '%s ' \"$p\"; done"]
-    stdout: StdioCollector {
-      waitForEnd: true
-      onStreamFinished: root.updateState(text)
-    }
-  }
-
-  Timer {
-    interval: 3000
+    id: watchProc
     running: true
-    repeat: true
-    triggeredOnStart: true
-    onTriggered: root.refresh()
+    command: ["bash", Quickshell.env("HOME") + "/.config/omarchy/plugins/azzen.agent-active/agent-watch.sh"]
+    stdout: SplitParser {
+      onRead: (data) => root.updateState(data)
+    }
   }
 
   BarIconButton {

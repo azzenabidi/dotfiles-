@@ -27,7 +27,7 @@ Panel {
   readonly property string pulseColor: normalizedPulseColor(
     savedSetting("pulseColor", tealColor))
   readonly property bool animationEnabled:
-    savedSetting("animation", true) !== false
+    savedSetting("animation", false) !== false
   readonly property bool showSingleLayout:
     savedSetting("showSingleLayout", false) === true
   readonly property color urgent: bar ? bar.urgent : Color.urgent

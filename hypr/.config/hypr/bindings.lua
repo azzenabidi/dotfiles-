@@ -18,9 +18,10 @@
 hl.unbind("SUPER + W")
 o.bind("SUPER + Q", "Close window", hl.dsp.window.close())
 
--- OpenCode on Super+Shift+O (overrides default Obsidian)
+-- Agent picker on Super+Shift+O (moved from Super+Shift+Ctrl+A, overrides default Obsidian)
 hl.unbind("SUPER + SHIFT + O")
-o.bind("SUPER + SHIFT + O", "OpenCode", "uwsm-app -- xdg-terminal-exec --dir=\"$HOME\" opencode --auto")
+hl.unbind("SUPER + SHIFT + CTRL + A")
+o.bind("SUPER + SHIFT + O", "Agent", "omarchy-agent --pick")
 
 -- Neovim Cheatsheet on Super+N
 o.bind("SUPER + N", "Neovim Cheatsheet", "uwsm-app -- /home/azzen/.local/bin/neovim-cheatsheet")
